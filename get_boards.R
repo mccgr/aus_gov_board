@@ -15,39 +15,6 @@ url <-
     html_children() %>% 
     html_attr('href')
 
-get_board <- function(url) {
-    url <- paste0("https://www.directory.gov.au/", url)
-    table <-
-        read_html(url) %>%
-        html_nodes("table") 
-    if (length(table) > 0) {
-        res <- 
-            table %>%
-            .[[1]] %>%
-            html_table() %>% 
-            as_tibble() %>%
-            mutate(url = url)
-        return(res)
-    }
-}
-
-library(rvest)
-library(dplyr, warn.conflicts = FALSE)
-url <- "https://www.directory.gov.au/boards-and-other-entities"
-html <- read_html(url) 
-
-name <-
-    html %>%
-    html_nodes(".views-table") %>%
-    .[[1]] %>%
-    html_table() 
-
-url <-
-    html %>%
-    html_nodes(".views-field") %>%
-    html_children() %>% 
-    html_attr('href')
-
 library(rvest)
 library(lubridate)
 library(dplyr, warn.conflicts = FALSE)
