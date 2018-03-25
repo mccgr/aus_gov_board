@@ -47,6 +47,19 @@ fix_names <- function(df) {
 
 directors <- bind_rows(temp) %>% fix_names()
 
+# Convert all dates in start_date and end_date with the empty string "" to NA, and set all dates with the entry 
+# "Determined by the appointer" to NA as well
+
+directors$start_date[nchar(directors$start_date) == 0] <- NA
+directors$end_date[nchar(directors$end_date) == 0] <- NA
+directors$end_date[directors$end_date == "Determined by the appointer" & !is.na(directors$end_date)] <- NA
+
+# All other entries have valid dates. Use the dmy function from lubridate to convert to datetime format
+
+directors$start_date <- dmy(directors$start_date)
+directors$end_date <- dmy(directors$end_date)
+
+
 library(RPostgreSQL)
 pg <- dbConnect(PostgreSQL())
 
