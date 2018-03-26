@@ -45,25 +45,18 @@ fix_names <- function(df) {
     df
 }
 
-directors <- bind_rows(temp) %>% fix_names()
-
-# Convert all dates in start_date and end_date with the empty string "" to NA, and set all dates with the entry 
-# "Determined by the appointer" to NA as well
-
-directors$start_date[nchar(directors$start_date) == 0] <- NA
-directors$end_date[nchar(directors$end_date) == 0] <- NA
-directors$end_date[directors$end_date == "Determined by the appointer" & !is.na(directors$end_date)] <- NA
-
-# All other entries have valid dates. Use the dmy function from lubridate to convert to datetime format
-
-directors$start_date <- dmy(directors$start_date)
-directors$end_date <- dmy(directors$end_date)
-
+directors <- 
+    bind_rows(temp) %>% 
+    fix_names() %>%
+    mutate(end_date = if_else(end_date == "Determined by the appointer", NA_character_, end_date)) %>%
+    mutate(start_date = if_else(start_date == "", NA_character_, start_date),
+           end_date = if_else(end_date == "", NA_character_, end_date)) %>%
+    mutate_at(c("start_date", "end_date"), dmy)
 
 library(RPostgreSQL)
 pg <- dbConnect(PostgreSQL())
 
-rs <- dbGetQuery(pg, "SET search_path TO aus_gov_board")
+rs <- dbExecute(pg, "SET search_path TO aus_gov_board")
 dbWriteTable(pg, "links", links, overwrite = TRUE, row.names = FALSE)
 dbWriteTable(pg, "directors", directors, overwrite = TRUE, row.names = FALSE)
 
