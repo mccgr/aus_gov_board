@@ -65,9 +65,9 @@ db_comment <- paste0(" 'CREATED USING get_boards.R ON ", Sys.time(), "'")
 # Identify owners of the data
 dbGetQuery(pg, "GRANT SELECT ON links TO aus_gov_board_access")
 dbGetQuery(pg, paste0("COMMENT ON TABLE links IS ", db_comment))
-dbGetQuery(pg, "ALTER TABLE links OWNER TO aus_gov_board_access")
+dbGetQuery(pg, "ALTER TABLE links OWNER TO aus_gov_board")
 
 dbGetQuery(pg, "GRANT SELECT ON directors TO aus_gov_board_access")
 dbGetQuery(pg, paste0("COMMENT ON TABLE directors IS ", db_comment))
-dbGetQuery(pg, "ALTER TABLE directors OWNER TO aus_gov_board_access")
+dbGetQuery(pg, "ALTER TABLE directors OWNER TO aus_gov_board")
 dbDisconnect(pg)
