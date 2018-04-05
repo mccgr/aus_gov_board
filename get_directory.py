@@ -49,28 +49,28 @@ class XML2DataFrame:
         return pd.DataFrame(structure_data)
 
 xml2df = XML2DataFrame(xml_data)
-xml_dataframe = xml2df.process_data()
+df = xml2df.process_data()
 
 
                      
 
 # Arrange the columns so that those with the least missing values appear on the left.
 
-indices = np.argsort(xml_dataframe.isnull().sum())
-xml_dataframe = xml_dataframe.iloc[:, indices]
+indices = np.argsort(df.isnull().sum())
+df = df.iloc[:, indices]
 
 # Arrange the first few columns so that we have, in order, unique_record_id, content_id, updated, and type as
 # the first four columns. 
 
 indices = [1, 3, 0, 2] + [i for i in range(4, 81)]
-xml_dataframe2 = xml_dataframe2.iloc[:, indices]
-xml_dataframe2.head()
+df2 = df2.iloc[:, indices]
+df2.head()
                      
                      
 # Let's start to put the columns which have dates into datetime format
 # Get rid of the "Determined by the appointer" entries in end_date by setting these entries to None
  
-xml_dataframe.loc[np.logical_and(xml_dataframe['end_date'] == "Determined by the appointer", xml_dataframe['end_date'].notnull()), 'end_date'] = None 
+df.loc[np.logical_and(df['end_date'] == "Determined by the appointer", df['end_date'].notnull()), 'end_date'] = None 
 
 
 
@@ -81,10 +81,10 @@ import pytz
  
 local = tzlocal()
 
-xml_dataframe['updated'] = pd.to_datetime(xml_dataframe['updated']).apply(lambda x: x.replace(tzinfo = local).astimezone(pytz.utc))
-xml_dataframe['start_date'] = pd.to_datetime(xml_dataframe['start_date'])
-xml_dataframe['end_date'] = pd.to_datetime(xml_dataframe['end_date'])
-xml_dataframe['creation_date'] = pd.to_datetime(xml_dataframe['creation_date'])
+df['updated'] = pd.to_datetime(df['updated']).apply(lambda x: x.replace(tzinfo = local).astimezone(pytz.utc))
+df['start_date'] = pd.to_datetime(df['start_date'])
+df['end_date'] = pd.to_datetime(df['end_date'])
+df['creation_date'] = pd.to_datetime(df['creation_date'])
                      
                      
                      
@@ -92,15 +92,15 @@ xml_dataframe['creation_date'] = pd.to_datetime(xml_dataframe['creation_date'])
 
 int_col_names = []
 
-for colname in xml_dataframe.columns:
-    if(sum([not is_integer(x) for x in xml_dataframe[colname].value_counts().index]) == 0):
+for colname in df.columns:
+    if(sum([not is_integer(x) for x in df[colname].value_counts().index]) == 0):
         int_col_names.append(colname)
 
-xml_dataframe[int_col_names] = xml_dataframe[int_col_names].apply(pd.to_numeric)
+df[int_col_names] = df[int_col_names].apply(pd.to_numeric)
                      
                      
                      
-xml_dataframe.to_sql('directory', engine, schema="aus_gov_board",
+df.to_sql('directory', engine, schema="aus_gov_board",
                      if_exists="replace", index=False)                    
                      
                      
