@@ -66,12 +66,16 @@ dir_gender <-
     dir_titles %>% 
     left_join(
         names_df %>%
-            select(appointee, gender) %>%
-            rename(manual_gender = gender)) %>%
+            select(appointee, gender, first_name, last_name) %>%
+            rename(manual_gender = gender,
+                   manual_first_name = first_name,
+                   manual_last_name = last_name)) %>%
     left_join(titles_df) %>%
     left_join(gendered_names) %>%
-    mutate(gender = coalesce(manual_gender, gender, name_gender)) %>%
-    select(-gender_indicated, -name_gender, -manual_gender)
+    mutate(gender = coalesce(manual_gender, gender, name_gender),
+           last_name = coalesce(manual_last_name, last_name),
+           first_name = coalesce(manual_first_name, first_name)) %>%
+    select(-gender_indicated, -name_gender, -matches("manual")) 
 
 dir_gender %>% count(gender)
 
