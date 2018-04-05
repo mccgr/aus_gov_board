@@ -101,9 +101,8 @@ df.to_sql('directory', engine, schema="aus_gov_board",
 
 # Do some database-related clean-up
 engine.execute("""
-    SET search_path TO aus_gov_board;
-    ALTER TABLE directory OWNER TO aus_gov_board;
-    GRANT SELECT ON directory TO aus_gov_board_access;
+    ALTER TABLE aus_gov_board.directory OWNER TO aus_gov_board;
+    GRANT SELECT ON aus_gov_board.directory TO aus_gov_board_access;
 """)
     
 # Convert the float columns to integer
