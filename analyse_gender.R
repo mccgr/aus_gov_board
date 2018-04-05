@@ -79,4 +79,14 @@ dir_gender <-
 
 dir_gender %>% count(gender)
 
+rs <- dbExecute(pg, "SET search_path TO aus_gov_board")
+dbWriteTable(pg, "gender", dir_gender, overwrite = TRUE, row.names = FALSE)
+
+db_comment <- paste0(" 'CREATED USING create_gender.R ON ", Sys.time(), "'")
+
+# Identify owners of the data
+dbGetQuery(pg, "GRANT SELECT ON gender TO aus_gov_board_access")
+dbGetQuery(pg, paste0("COMMENT ON TABLE gender IS ", db_comment))
+dbGetQuery(pg, "ALTER TABLE gender OWNER TO aus_gov_board")
+
 rs <- dbDisconnect(pg)
