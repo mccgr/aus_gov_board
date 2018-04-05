@@ -15,6 +15,7 @@ xml_data = requests.get(user_agent_url).content
 import xml.etree.ElementTree as ET
 import pandas as pd
 
+# Thanks to http://www.austintaylor.io for this function
 class XML2DataFrame:
 
     def __init__(self, xml_data):
