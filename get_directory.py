@@ -1,3 +1,5 @@
+#!/usr/bin/env python3 
+
 def is_integer(input):
     try:
         num = int(input)
@@ -7,8 +9,6 @@ def is_integer(input):
         return False
     return True
 
-
-#!/usr/bin/env python3 
 from sqlalchemy import create_engine
 
 import os
