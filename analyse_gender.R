@@ -62,6 +62,14 @@ gendered_names <-
     distinct() %>%
     bind_rows(first_names_df)
     
+paste_suffixes <- function(x) {
+    if(length(x) > 0) {
+        return(str_flatten(x, " "))
+    } else {
+        return(NA)
+    }
+} 
+
 dir_gender <-
     dir_titles %>% 
     left_join(
@@ -75,7 +83,14 @@ dir_gender <-
     mutate(gender = coalesce(manual_gender, gender, name_gender),
            last_name = coalesce(manual_last_name, last_name),
            first_name = coalesce(manual_first_name, first_name)) %>%
-    select(-gender_indicated, -name_gender, -matches("manual")) 
+    select(-gender_indicated, -name_gender, -matches("manual")) %>%
+    mutate(suffixes = str_extract_all(last_name, "(?<=\\s)[A-Z]{2,}")) %>%
+    rowwise() %>%
+    mutate(suffixes = paste_suffixes(suffixes)) %>%
+    mutate(last_name = if_else(!is.na(suffixes), 
+                               str_trim(str_replace(last_name, str_c(suffixes, "$"), "")),
+                               last_name)) %>%
+    ungroup()
 
 dir_gender %>% count(gender)
 
