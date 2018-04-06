@@ -7,9 +7,17 @@ library(googlesheets)
 # Use gs_auth() if necessary
 gs <- gs_key("1_qnANgOSu3KUJTAkfzCwHRaC9t2PnmVXAvTkJIB3uII")
 
-titles_df <- gs_read(gs, ws = "titles")
-first_names_df <- gs_read(gs, ws = "first_names")
-names_df <- gs_read(gs, ws = "names")
+titles_df <- gs_read(gs, ws="titles")
+first_names_df <- gs_read(gs, ws="first_names")
+names_df <- gs_read(gs, ws="names")
+
+paste_suffixes <- function(x) {
+    if(length(x) > 0) {
+        return(str_flatten(x, " "))
+    } else {
+        return(NA)
+    }
+} 
 
 make_regex <- function(titles) {
     
@@ -42,18 +50,12 @@ dir_titles <-
     mutate(first_name = sql("temp2[1]"),
            last_name = sql("temp2[2]")) %>%
     select(appointee, first_name, last_name, title, fix_name) %>%
-    collect() %>%
-    mutate(suffixes = str_extract_all(last_name, "(?<=\\s)[A-Z,\\.]{2,}(?: \\(?Ret'?d\\)?)?")) %>%
-    rowwise() %>%
-    mutate(suffixes = paste_suffixes(suffixes)) %>%
-    mutate(suffix_regex = str_c(str_replace_all(suffixes, "(\\(|\\))", "\\\\\\1"), "$")) %>%
-    mutate(last_name = str_trim(last_name)) %>%
-    mutate(last_name = if_else(!is.na(suffixes), 
-                               str_trim(str_replace(last_name, suffix_regex, "")),
-                               last_name)) %>%
-    select(-fix_name, -suffix_regex)
-    
+    collect()
 dir_titles
+
+dir_titles %>% 
+    left_join(titles_df) %>% 
+    count(gender)
 
 # If names occurs at least 6 times and maps to only one gender
 # consider name to be gender-specific.
@@ -68,34 +70,20 @@ gendered_names <-
     distinct() %>%
     bind_rows(first_names_df)
     
-paste_suffixes <- function(x) {
-    if(length(x) > 0) {
-        return(str_flatten(x, " "))
-    } else {
-        return(NA)
-    }
-} 
-
 dir_gender <-
     dir_titles %>% 
     left_join(
         names_df %>%
-            select(appointee, gender, first_name, last_name, suffixes, title) %>%
-            rename(manual_title = title, 
-                   manual_gender = gender,
+            select(appointee, gender, first_name, last_name) %>%
+            rename(manual_gender = gender,
                    manual_first_name = first_name,
-                   manual_last_name = last_name,
-                   manual_suffixes = suffixes)) %>%
+                   manual_last_name = last_name)) %>%
     left_join(titles_df) %>%
     left_join(gendered_names) %>%
     mutate(gender = coalesce(manual_gender, gender, name_gender),
-           title = coalesce(manual_title, title),
            last_name = coalesce(manual_last_name, last_name),
-           first_name = coalesce(manual_first_name, first_name),
-           suffixes = coalesce(manual_suffixes, suffixes)) %>%
-    select(-gender_indicated, -name_gender, -matches("manual")) %>%
-    ungroup() %>%
-    mutate_all(function(x) if_else(x == "N/A", NA_character_, x))
+           first_name = coalesce(manual_first_name, first_name)) %>%
+    select(-gender_indicated, -name_gender, -matches("manual")) 
 
 dir_gender %>% count(gender)
 
