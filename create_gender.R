@@ -5,11 +5,11 @@ directors <- tbl(pg, sql("SELECT * FROM aus_gov_board.directors"))
 
 library(googlesheets)
 # Use gs_auth() if necessary
-gs <- gs_key("1_qnANgOSu3KUJTAkfzCwHRaC9t2PnmVXAvTkJIB3uII")
+gs <- "1_qnANgOSu3KUJTAkfzCwHRaC9t2PnmVXAvTkJIB3uII"
 
-titles_df <- gs_read(gs, ws="titles")
-first_names_df <- gs_read(gs, ws="first_names")
-names_df <- gs_read(gs, ws="names")
+titles_df <- sheets_read(gs, sheet="titles")
+first_names_df <- sheets_read(gs, sheet="first_names")
+names_df <- sheets_read(gs, sheet="names")
 
 paste_suffixes <- function(x) {
     if(length(x) > 0) {
