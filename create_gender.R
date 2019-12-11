@@ -3,8 +3,8 @@ library(dplyr, warn.conflicts = FALSE)
 pg <- dbConnect(PostgreSQL())
 directors <- tbl(pg, sql("SELECT * FROM aus_gov_board.directors"))
 
-library(googlesheets)
-# Use gs_auth() if necessary
+library(googlesheets4)
+# Use sheets_auth() if necessary
 gs <- "1_qnANgOSu3KUJTAkfzCwHRaC9t2PnmVXAvTkJIB3uII"
 
 titles_df <- sheets_read(gs, sheet="titles")
